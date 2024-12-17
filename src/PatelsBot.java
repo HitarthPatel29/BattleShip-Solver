@@ -17,7 +17,7 @@ public class PatelsBot implements BattleShipBot {
     private String botMode;
     private boolean [][] shotTracker;
     private Stack<Target> potentialTargets = new Stack<>();
-    Target currentTarget;
+    //Target currentTarget;
 
     /**
      * Constructor keeps a copy of the BattleShip instance
@@ -71,8 +71,8 @@ public class PatelsBot implements BattleShipBot {
         boolean hit = battleShip.shoot(new Point(x,y));     // Will return true if we hit a ship
         if (hit) {
             botMode = "trackMode";
-            currentTarget = new Target(x,y, "hunt");
-            addPotentialTargets("all");     // adds 4 location to the stack (up, down, right, left).
+            Target currentTarget = new Target(x,y, "all");
+            addPotentialTargets(currentTarget);     // adds 4 location to the stack (up, down, right, left).
         }
     }
 
@@ -90,7 +90,7 @@ public class PatelsBot implements BattleShipBot {
             markPoints(currentTarget.x, currentTarget.y);       //keeps track of the location
 
             if (hit) {
-                addPotentialTargets(currentTarget.lastDirection);       // adds the next potential target to the stack (in the same direction).
+                addPotentialTargets(currentTarget);       // adds the next potential target to the stack (in the same direction).
             }
         }else {     //if no more Potential targets are left to check
             botMode = "huntMode";
@@ -113,36 +113,40 @@ public class PatelsBot implements BattleShipBot {
     /**
      * This method check available Potential targets and their valid location before add them on the stack.
      * provides adding targets in all 4 direction or any particular direction.
-     * @param direction     the direction for where the potential target should be picked.
+     * @param target - current target
      */
-    public void addPotentialTargets(String direction){
+    public void addPotentialTargets(Target target){
 
-        if (direction.equals("all")) {
-            if ((currentTarget.x+1) < gameSize && !shotTracker[currentTarget.x+1][currentTarget.y]) potentialTargets.push(new Target(currentTarget.x+1, currentTarget.y, "right"));
-            if ((currentTarget.x-1) >= 0 && !shotTracker[currentTarget.x-1][currentTarget.y]) potentialTargets.push(new Target(currentTarget.x-1, currentTarget.y, "left"));
-            if ((currentTarget.y+1) < gameSize && !shotTracker[currentTarget.x][currentTarget.y+1]) potentialTargets.push(new Target(currentTarget.x, currentTarget.y+1, "down"));
-            if ((currentTarget.y-1) >= 0 && !shotTracker[currentTarget.x][currentTarget.y-1]) potentialTargets.push(new Target(currentTarget.x, currentTarget.y-1, "up"));
+        if (target.lastDirection.equals("all")) {
+            if ((target.y-1) >= 0 && !shotTracker[target.x][target.y-1])
+                potentialTargets.push(new Target(target.x, target.y-1, "up"));
+
+            if ((target.y+1) < gameSize && !shotTracker[target.x][target.y+1])
+                potentialTargets.push(new Target(target.x, target.y+1, "down"));
+
+            if ((target.x+1) < gameSize && !shotTracker[target.x+1][target.y])
+                potentialTargets.push(new Target(target.x+1, target.y, "right"));
+
+            if ((target.x-1) >= 0 && !shotTracker[target.x-1][target.y])
+                potentialTargets.push(new Target(target.x-1, target.y, "left"));
         }
-        else if (direction.equals("right")){
-            if ((currentTarget.x+1) < gameSize && !shotTracker[currentTarget.x+1][currentTarget.y]) {
-                potentialTargets.push(new Target(currentTarget.x+1, currentTarget.y, "right"));
-            }
+        else if (target.lastDirection.equals("right")){
+            if ((target.x+1) < gameSize && !shotTracker[target.x+1][target.y])
+                potentialTargets.push(new Target(target.x+1, target.y, "right"));
         }
-        else if (direction.equals("left")) {
-            if ((currentTarget.x-1) >= 0 && !shotTracker[currentTarget.x-1][currentTarget.y]) {
-                potentialTargets.push(new Target(currentTarget.x-1, currentTarget.y, "left"));
-            }
+        else if (target.lastDirection.equals("left")) {
+            if ((target.x-1) >= 0 && !shotTracker[target.x-1][target.y])
+                potentialTargets.push(new Target(target.x-1, target.y, "left"));
         }
-        else if (direction.equals("up")) {
-            if ((currentTarget.y - 1) >= 0 && !shotTracker[currentTarget.x][currentTarget.y-1]) {
-                potentialTargets.push(new Target(currentTarget.x, currentTarget.y - 1, "up"));
-            }
+        else if (target.lastDirection.equals("up")) {
+            if ((target.y - 1) >= 0 && !shotTracker[target.x][target.y-1])
+                potentialTargets.push(new Target(target.x, target.y - 1, "up"));
         }
-        else if (direction.equals("down")) {
-            if ((currentTarget.y + 1) < gameSize && !shotTracker[currentTarget.x][currentTarget.y+1]) {
-                potentialTargets.push(new Target(currentTarget.x, currentTarget.y + 1, "down"));
-            }
+        else if (target.lastDirection.equals("down")) {
+            if ((target.y + 1) < gameSize && !shotTracker[target.x][target.y+1])
+                potentialTargets.push(new Target(target.x, target.y + 1, "down"));
         }
+        else throw new RuntimeException("lastDirection not defined!!!");
     }
 
     /**
